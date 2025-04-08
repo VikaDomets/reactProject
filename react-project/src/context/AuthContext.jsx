@@ -1,0 +1,170 @@
+// import { createContext, useContext, useState, useEffect } from 'react';
+// import { useNavigate } from 'react-router-dom';
+
+// const AuthContext = createContext();
+
+// export const AuthProvider = ({ children }) => {
+//     const [user, setUser] = useState(null);
+//     const [loading, setLoading] = useState(true);
+//     const navigate = useNavigate();
+//     const BASE_API_URL = "https://your-backend-api.com/api";
+
+//     useEffect(() => {
+//         const userData = JSON.parse(localStorage.getItem('user'));
+//         if (userData) {
+//             setUser(userData);
+//         }
+//         setLoading(false);
+//     }, []);
+
+//     const login = async (name, password) => {
+//         try {
+//             const response = await fetch(`${BASE_API_URL}/user/auth/login/`, {
+//                 method: 'POST',
+//                 headers: { 'Content-Type': 'application/json' },
+//                 body: JSON.stringify({ name, password })
+//             });
+
+//             const data = await response.json();
+            
+//             if (!response.ok || data.status !== "authorize") {
+//                 throw new Error(data.message || 'Невірний логін або пароль');
+//             }
+
+//             const userData = {
+//                 username: data.username,
+//                 name: name,
+//                 token: data.token || 'dummy-token'
+//             };
+
+//             localStorage.setItem('user', JSON.stringify(userData));
+//             setUser(userData);
+            
+//             return { success: true };
+//         } catch (error) {
+//             return { success: false, message: error.message };
+//         }
+//     };
+
+//     const logout = async () => {
+//         try {
+//             if (user?.token) {
+//                 await fetch(`${BASE_API_URL}/user/auth/logout/`, {
+//                     method: 'POST',
+//                     headers: { 'Authorization': `Bearer ${user.token}` }
+//                 });
+//             }
+//         } finally {
+//             localStorage.removeItem('user');
+//             setUser(null);
+//             navigate('/login');
+//         }
+//     };
+
+//     const register = async (formData) => {
+//         try {
+//             const response = await fetch(`${BASE_API_URL}/user/registration/`, {
+//                 method: 'POST',
+//                 headers: { 'Content-Type': 'application/json' },
+//                 body: JSON.stringify({
+//                     name: formData.username,
+//                     email: formData.email,
+//                     password: formData.password,
+//                     Phone: formData.phone,
+//                     birthday: formData.birthday
+//                 })
+//             });
+
+//             const data = await response.json();
+            
+//             if (!response.ok || data.status !== "success") {
+//                 throw new Error(data.message || 'Помилка реєстрації');
+//             }
+
+//             return { success: true };
+//         } catch (error) {
+//             return { success: false, message: error.message };
+//         }
+//     };
+
+//     return (
+//         <AuthContext.Provider value={{ user, loading, login, logout, register }}>
+//             {children}
+//         </AuthContext.Provider>
+//     );
+// };
+
+// export const useAuth = () => useContext(AuthContext);
+
+import axios from 'axios';
+
+// Базовий URL для API
+const API_URL = 'https://gallery.net/api/user/auth/';
+
+// Функція для авторизації користувача (логін)
+export const login = async (username, password) => {
+  try {
+    const response = await axios.post(`${API_URL}login/`, {
+      name: username,
+      password: password
+    });
+
+    if (response.data && response.data.username) {
+      localStorage.setItem('username', response.data.username); // Зберігаємо ім'я користувача в localStorage
+      localStorage.setItem('token', response.data.token); // Зберігаємо токен в localStorage (якщо це передбачається бекендом)
+      return true; // Повертаємо true, якщо авторизація успішна
+    }
+
+    return false; // Якщо немає username, повертаємо false
+  } catch (error) {
+    console.error("Error during login:", error);
+    throw new Error("Невірний логін або пароль");
+  }
+};
+
+// Функція для логауту користувача
+export const logout = async () => {
+  try {
+    await axios.post(`${API_URL}logout/`);
+    localStorage.removeItem('username'); // Очищаємо дані користувача з localStorage
+    localStorage.removeItem('token'); // Очищаємо токен
+  } catch (error) {
+    console.error("Error during logout:", error);
+  }
+};
+
+// Функція для перевірки, чи авторизований користувач
+export const checkAuth = () => {
+  const token = localStorage.getItem('token');
+  // Перевірка на наявність токену в localStorage
+  return token ? true : false;
+};
+
+// Функція для отримання імені користувача (якщо авторизований)
+export const getUsername = () => {
+  return localStorage.getItem('username'); // Отримуємо ім'я користувача з localStorage
+};
+
+// Функція для реєстрації нового користувача
+export const register = async (form) => {
+  try {
+    const response = await axios.post('https://gallery.net/api/user/registration/', {
+      name: form.username,
+      email: form.email,
+      password: form.password,
+      Phone: form.number,
+      birthday: form.birthday
+    });
+
+    if (response.data && response.data.username) {
+      localStorage.setItem('username', response.data.username); // Зберігаємо ім'я користувача в localStorage
+      localStorage.setItem('token', response.data.token); // Зберігаємо токен
+      return true; // Повертаємо true, якщо реєстрація успішна
+    }
+
+    return false; // Якщо немає username, повертаємо false
+  } catch (error) {
+    console.error("Error during registration:", error);
+    throw new Error("Помилка реєстрації");
+  }
+};

@@ -1,0 +1,479 @@
+/* Основні стилі галереї
+.section-content .content-photo img {
+    transition: all 1s;
+    overflow: hidden;
+    margin-bottom: 30px;
+    cursor: pointer;
+    object-fit: cover;
+    display: block;
+}
+
+Індивідуальні розміри для кожного зображення
+.first-left img:nth-child(1) {
+    width: 689px ;
+    height: 551px;
+}
+
+.first-left img:nth-child(2) {
+    width: 694px;
+    height: 555px;
+}
+
+.first-right img {
+    width: 987px;
+    height: 790px;
+}
+
+.content-second img:nth-child(1) {
+    width: 605px;
+    height: 484px;
+}
+
+.content-second img:nth-child(2) {
+    width: 1000px;
+    height: 800px;
+}
+
+.third-left img {
+    width: 627px;
+    height: 502px;
+}
+
+.third-right img {
+    width: 914px;
+    height: 731px;
+}
+
+.fourth-left img,
+.fourth-right img {
+    width: 795px;
+    height: 636px;
+}
+
+.section-content .content-photo img:hover {
+    opacity: 0.5;
+}
+
+.section-heading {
+    display: flex;
+    justify-content: flex-start;
+    align-items: baseline;
+    text-align: left;
+    gap: 50px;
+    padding-top: 30px;
+    padding-bottom: 30px;
+}
+
+h1 {
+    font-size: 1.5em;
+    color: #081C30;
+    font-family: "Ysabeau SC", sans-serif;
+}
+
+h1 strong {
+    color: #204872;
+}
+
+.section-heading p {
+    color: #081C30;
+    font-family: "Ysabeau SC", sans-serif;
+    font-size: 1.2em;
+}
+
+.content-section {
+    padding-left: 100px;
+    padding-right: 100px;
+}
+
+.content-photo {
+    display: flex;
+    justify-content: space-between;
+    padding-bottom: 50px;
+}
+
+.first-left {
+    display: flex;
+    flex-direction: column;
+    gap: 50px;
+}
+
+.first-right {
+    display: flex;
+    justify-content: space-between;
+}
+
+.content-second {
+    align-items: center;
+    gap: 50px;
+    display: flex;
+}
+
+Стилі Swiper модального вікна
+.swiper-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.95);
+    display: none;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    opacity: 0;
+    transition: opacity 0.3s;
+}
+
+.swiper-modal.active {
+    display: flex;
+    opacity: 1;
+}
+
+.swiper-container {
+    width: 90%;
+    height: 90%;
+    position: relative;
+}
+
+.swiper-wrapper {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+}
+
+.swiper-slide {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    height: 100%;
+    padding: 0 40px;
+    box-sizing: border-box;
+}
+
+.swiper-slide img {
+    max-width: 100%;
+    max-height: 90vh;
+    object-fit: contain;
+    border-radius: 4px;
+}
+
+Стилі для стрілок Swiper
+.swiper-button-next,
+.swiper-button-prev {
+    position: absolute;
+    top: 50%;
+    width: 40px;
+    height: 40px;
+    margin-top: -16px;
+    z-index: 10;
+    border-radius: 50%;
+    transition: all 0.3s;
+}
+
+.swiper-button-next::after,
+.swiper-button-prev::after {
+    font-size: 35px;
+    color: white;
+    font-weight: bold;
+}
+
+.swiper-button-next {
+    right: 15px;
+}
+
+.swiper-button-prev {
+    left: 15px;
+}
+
+Кнопка закриття
+.swiper-close {
+    position: absolute;
+    top: 0px;
+    right: 18px;
+    color: white;
+    font-size: 40px;
+    cursor: pointer;
+    z-index: 1010;
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    transition: all 0.3s;
+}
+
+.swiper-close:hover {
+    background: rgba(0, 0, 0, 0.8);
+}
+
+Адаптація для мобільних
+@media (max-width: 768px) {
+    .content-section {
+        padding-left: 20px;
+        padding-right: 20px;
+    }
+
+    .content-photo {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .first-left,
+    .first-right,
+    .third-left,
+    .third-right,
+    .fourth-left,
+    .fourth-right,
+    .content-second {
+        width: 100%;
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+        align-items: center;
+    }
+
+    .section-content .content-photo img {
+        width: 100% !important;
+        height: auto !important;
+    }
+
+    .swiper-container {
+        width: 100%;
+        height: 100%;
+    }
+
+    .swiper-slide {
+        padding: 0 15px;
+    }
+
+    .swiper-button-next,
+    .swiper-button-prev {
+        width: 28px;
+        height: 28px;
+        margin-top: -14px;
+    }
+
+    .swiper-button-next::after,
+    .swiper-button-prev::after {
+        font-size: 16px;
+    }
+
+    .swiper-close {
+        top: 15px;
+        right: 15px;
+        font-size: 24px;
+        width: 32px;
+        height: 32px;
+    }
+} */
+
+.galleryImg {
+    transition: all 1s;
+    width: 100%;
+    overflow: hidden;
+    margin-bottom: 30px;
+    cursor: pointer;
+  }
+  
+  .galleryImg:hover {
+    opacity: 0.5;
+  }
+  
+  .sectionHeading {
+    display: flex;
+    justify-content: flex-start;
+    align-items: baseline;
+    text-align: left;
+    gap: 50px;
+    padding-top: 30px;
+    padding-bottom: 30px;
+  }
+  
+  .headingTitle {
+    font-size: 1.5em;
+    color: #081C30;
+    font-family: "Ysabeau SC", sans-serif;
+  }
+  
+  .headingTitle strong {
+    color: #204872;
+  }
+  
+  .headingText {
+    color: #081C30;
+    font-family: "Ysabeau SC", sans-serif;
+    font-size: 1.2em;
+  }
+  
+  .contentSection {
+    padding-left: 100px;
+    padding-right: 100px;
+  }
+  
+  .contentPhoto {
+    display: flex;
+    justify-content: space-between;
+    padding-bottom: 50px;
+  }
+  
+  .firstLeft,
+  .thirdLeft,
+  .fourthLeft {
+    display: flex;
+    flex-direction: column;
+    gap: 50px;
+  }
+  
+  .firstRight,
+  .thirdRight,
+  .fourthRight {
+    display: flex;
+    justify-content: space-between;
+  }
+  
+  .contentSecond {
+    align-items: center;
+    gap: 50px;
+    display: flex;
+  }
+  
+  /* Swiper модалка */
+  .swiperModal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.95);
+    display: none;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    opacity: 0;
+    transition: opacity 0.3s;
+  }
+  
+  .swiperModal.active {
+    display: flex;
+    opacity: 1;
+  }
+  
+  .swiperContainer {
+    width: 90%;
+    height: 90%;
+    position: relative;
+  }
+  
+  .swiperWrapper {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+  }
+  
+  .swiperSlide {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    height: 100%;
+    padding: 0 40px;
+    box-sizing: border-box;
+  }
+  
+  .swiperSlide img {
+    max-width: 100%;
+    max-height: 90vh;
+    object-fit: contain;
+    border-radius: 4px;
+  }
+  
+  /* Стилі для стрілок */
+  .swiper-button-next,
+  .swiper-button-prev {
+    position: absolute;
+    top: 50%;
+    width: 40px;
+    height: 40px;
+    margin-top: -16px;
+    z-index: 10;
+    border-radius: 50%;
+    transition: all 0.3s;
+  }
+  
+  .swiper-button-next::after,
+  .swiper-button-prev::after {
+    font-size: 35px;
+    color: white;
+    font-weight: bold;
+  }
+  
+  .swiper-button-next {
+    right: 15px;
+  }
+  
+  .swiper-button-prev {
+    left: 15px;
+  }
+  
+  /* Кнопка закриття */
+  .swiperClose {
+    position: absolute;
+    top: 0px;
+    right: 18px;
+    color: white;
+    font-size: 40px;
+    cursor: pointer;
+    z-index: 1010;
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    transition: all 0.3s;
+  }
+  
+  .swiperClose:hover {
+    background: rgba(0, 0, 0, 0.8);
+  }
+  
+  /* Адаптація */
+  @media (max-width: 768px) {
+    .contentSection {
+      padding-left: 20px;
+      padding-right: 20px;
+    }
+  
+    .swiperContainer {
+      width: 100%;
+      height: 100%;
+    }
+  
+    .swiperSlide {
+      padding: 0 15px;
+    }
+  
+    .swiper-button-next,
+    .swiper-button-prev {
+      width: 28px;
+      height: 28px;
+      margin-top: -14px;
+    }
+  
+    .swiper-button-next::after,
+    .swiper-button-prev::after {
+      font-size: 16px;
+    }
+  
+    .swiperClose {
+      top: 15px;
+      right: 15px;
+      font-size: 24px;
+      width: 32px;
+      height: 32px;
+    }
+  }
