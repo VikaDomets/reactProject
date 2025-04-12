@@ -1,8 +1,9 @@
-
-import { useContext, useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { useContext, useState, useEffect } from 'react';
+import { useParams, Link, useNavigate } from 'react-router-dom';
 import { ExhibitionsContext } from '../context/ExhibitionsContext';
-import styles from '../styles/exhibitions.module.css';
+import LikeButton from '../components/LikeButton';
+import CommentSection from '../components/CommentSection';
+import styles from '../styles/exhibitionSingle.module.css';
 
 import img1 from '../assets/img/exh1.jpg';
 import img2 from '../assets/img/exh2.jpg';
@@ -12,7 +13,7 @@ import img5 from '../assets/img/exh5.jpg';
 import img6 from '../assets/img/exh6.jpg';
 import img7 from '../assets/img/exh7.jpg';
 
-// Статичні (локальні) виставки
+// Статичні дані (як у Exhibitions.jsx)
 const staticExhibitions = [
   {
     id: 'local-1',
@@ -75,97 +76,86 @@ const staticExhibitions = [
   },
 ];
 
-const itemsPerPage = 3;
+const ExhibitionSingle = () => {
+  const { id } = useParams();
+  const navigate = useNavigate();
+  const { fetchSingleExhibition } = useContext(ExhibitionsContext);
+  const [exhibition, setExhibition] = useState(null);
+  const [loading, setLoading] = useState(true);
 
-const Exhibitions = () => {
-  const { exhibitions, loading, error } = useContext(ExhibitionsContext);
-  const [currentPage, setCurrentPage] = useState(1);
-
-  // Об'єднуємо статичні та динамічні виставки
-  const allExhibitions = [...staticExhibitions, ...(exhibitions || [])];
-  const totalPages = Math.ceil(allExhibitions.length / itemsPerPage);
-
-  // Отримуємо виставки для поточної сторінки
-  const currentExhibitions = allExhibitions.slice(
-    (currentPage - 1) * itemsPerPage,
-    currentPage * itemsPerPage
-  );
-
-  // Скидаємо сторінку при зміні даних
   useEffect(() => {
-    setCurrentPage(1);
-  }, [exhibitions]);
+    const loadExhibition = async () => {
+      try {
+        if (id.startsWith('local-')) {
+          const staticExh = staticExhibitions.find(ex => ex.id === id);
+          setExhibition(staticExh);
+        } else {
+          const data = await fetchSingleExhibition(id);
+          setExhibition(data);
+        }
+      } catch (error) {
+        console.error("Помилка завантаження:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    loadExhibition();
+  }, [id]);
+
+  useEffect(() => {
+    if (exhibition) {
+      document.body.style.setProperty(
+        '--bg-image', 
+        `url(${exhibition.image instanceof File ? 
+          URL.createObjectURL(exhibition.image) : 
+          exhibition.image})`
+      );
+    }
+    
+    return () => {
+      document.body.style.removeProperty('--bg-image');
+    };
+  }, [exhibition]);
+
+  if (loading) return <div className={styles.loading}>Завантаження...</div>;
+  if (!exhibition) return <div className={styles.error}>Виставку не знайдено</div>;
 
   return (
-    <section className={styles.exhibition}>
-      <div className={styles['exhibition-section']}>
-        <div className={styles['text-container']}>
-          <h1>
-            Перелік <br />
-            <strong>Виставок</strong>
-          </h1>
-          <p>
-            Виставки створюють унікальні можливості для вивчення, враження та
-            взаємодії з різними сферами. <br />
-            Мистецтва, науки та культури.
-          </p>
-        </div>
-
-        {loading && <p className={styles.loading}>Завантаження...</p>}
-        {error && <p className={styles.error}>{error}</p>}
-
-        <div className={styles['exhibitions-list']}>
-          {currentExhibitions.map((item) => (
-            <div className={styles['section-img']} key={item.id}>
-              <div className={styles['exh-container']}>
-                <div className={styles['exh-img']}>
-                  <Link to={`/exhibition/${item.id}`}>
-                    <img
-                      src={item.image instanceof File ? URL.createObjectURL(item.image) : item.image}
-                      alt={item.title}
-                      className={styles['exh-img-item']}
-                      loading="lazy"
-                    />
-                  </Link>
-                </div>
-                <div className={styles['exh-text']}>
-                  <Link to={`/exhibition/${item.id}`} className={styles['exh-link']}>
-                    <h2>{item.title}</h2>
-                  </Link>
-                  <p className={styles['exh-date']}>
-                    {item.date || `${item.start_date} - ${item.end_date}`}
-                  </p>
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
-
-        {totalPages > 1 && (
-          <div className={styles['pagination-container']}>
-            <nav aria-label="Навігація по сторінкам">
-              <ul className={styles.pagination}>
-                {Array.from({ length: totalPages }, (_, i) => (
-                  <li
-                    key={i}
-                    className={`${styles['page-item']} ${currentPage === i + 1 ? styles.active : ''}`}
-                  >
-                    <button
-                      className={styles['page-link']}
-                      onClick={() => setCurrentPage(i + 1)}
-                      aria-current={currentPage === i + 1 ? 'page' : undefined}
-                    >
-                      {i + 1}
-                    </button>
-                  </li>
-                ))}
-              </ul>
-            </nav>
-          </div>
-        )}
+    <section className={styles.exhibitionSingle}>
+      <div className={styles.header}>
+        <h1>{exhibition.title}</h1>
+        <button 
+          onClick={() => navigate(`/edit-exhibition/${id}`)}
+          className={styles.editButton}
+        >
+          Редагувати
+        </button>
       </div>
+
+      <div className={styles.content}>
+        <img 
+          src={exhibition.image instanceof File ? URL.createObjectURL(exhibition.image) : exhibition.image} 
+          alt={exhibition.title} 
+          className={styles.image}
+        />
+        
+        <div className={styles.details}>
+          <p className={styles.dates}>
+            {exhibition.date || `${exhibition.start_date} - ${exhibition.end_date}`}
+          </p>
+          <p className={styles.description}>{exhibition.description}</p>
+          
+          <div className={styles.interactions}>
+            <LikeButton exhibitionId={id} />
+          </div>
+        </div>
+      </div>
+
+      <CommentSection exhibitionId={id} />
     </section>
   );
 };
 
-export default Exhibitions;
+
+
+export default ExhibitionSingle;

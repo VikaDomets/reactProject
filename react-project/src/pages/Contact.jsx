@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import styles from '../styles/contact.module.css';
+import { sendContactMessage } from '../context/AuthContext';
 
 const Contacts = () => {
   const [form, setForm] = useState({
@@ -18,15 +19,9 @@ const Contacts = () => {
     e.preventDefault();
   
     try {
-      const response = await fetch('http://localhost:5000/api/contact', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(form),
-      });
-  
-      if (response.ok) {
+      const response = await sendContactMessage(form); 
+
+      if (success) {
         alert("Повідомлення успішно надіслано!");
         setForm({ username: '', email: '', message: '' }); // Очистити форму
       } else {

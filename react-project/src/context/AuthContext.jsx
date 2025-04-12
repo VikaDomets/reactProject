@@ -1,100 +1,4 @@
-// import { createContext, useContext, useState, useEffect } from 'react';
-// import { useNavigate } from 'react-router-dom';
 
-// const AuthContext = createContext();
-
-// export const AuthProvider = ({ children }) => {
-//     const [user, setUser] = useState(null);
-//     const [loading, setLoading] = useState(true);
-//     const navigate = useNavigate();
-//     const BASE_API_URL = "https://your-backend-api.com/api";
-
-//     useEffect(() => {
-//         const userData = JSON.parse(localStorage.getItem('user'));
-//         if (userData) {
-//             setUser(userData);
-//         }
-//         setLoading(false);
-//     }, []);
-
-//     const login = async (name, password) => {
-//         try {
-//             const response = await fetch(`${BASE_API_URL}/user/auth/login/`, {
-//                 method: 'POST',
-//                 headers: { 'Content-Type': 'application/json' },
-//                 body: JSON.stringify({ name, password })
-//             });
-
-//             const data = await response.json();
-            
-//             if (!response.ok || data.status !== "authorize") {
-//                 throw new Error(data.message || 'Невірний логін або пароль');
-//             }
-
-//             const userData = {
-//                 username: data.username,
-//                 name: name,
-//                 token: data.token || 'dummy-token'
-//             };
-
-//             localStorage.setItem('user', JSON.stringify(userData));
-//             setUser(userData);
-            
-//             return { success: true };
-//         } catch (error) {
-//             return { success: false, message: error.message };
-//         }
-//     };
-
-//     const logout = async () => {
-//         try {
-//             if (user?.token) {
-//                 await fetch(`${BASE_API_URL}/user/auth/logout/`, {
-//                     method: 'POST',
-//                     headers: { 'Authorization': `Bearer ${user.token}` }
-//                 });
-//             }
-//         } finally {
-//             localStorage.removeItem('user');
-//             setUser(null);
-//             navigate('/login');
-//         }
-//     };
-
-//     const register = async (formData) => {
-//         try {
-//             const response = await fetch(`${BASE_API_URL}/user/registration/`, {
-//                 method: 'POST',
-//                 headers: { 'Content-Type': 'application/json' },
-//                 body: JSON.stringify({
-//                     name: formData.username,
-//                     email: formData.email,
-//                     password: formData.password,
-//                     Phone: formData.phone,
-//                     birthday: formData.birthday
-//                 })
-//             });
-
-//             const data = await response.json();
-            
-//             if (!response.ok || data.status !== "success") {
-//                 throw new Error(data.message || 'Помилка реєстрації');
-//             }
-
-//             return { success: true };
-//         } catch (error) {
-//             return { success: false, message: error.message };
-//         }
-//     };
-
-//     return (
-//         <AuthContext.Provider value={{ user, loading, login, logout, register }}>
-//             {children}
-//         </AuthContext.Provider>
-//     );
-// };
-
-// export const useAuth = () => useContext(AuthContext);
 
 import axios from 'axios';
 
@@ -110,12 +14,12 @@ export const login = async (username, password) => {
     });
 
     if (response.data && response.data.username) {
-      localStorage.setItem('username', response.data.username); // Зберігаємо ім'я користувача в localStorage
-      localStorage.setItem('token', response.data.token); // Зберігаємо токен в localStorage (якщо це передбачається бекендом)
-      return true; // Повертаємо true, якщо авторизація успішна
+      localStorage.setItem('username', response.data.username);
+      localStorage.setItem('token', response.data.token);
+      return true;
     }
 
-    return false; // Якщо немає username, повертаємо false
+    return false;
   } catch (error) {
     console.error("Error during login:", error);
     throw new Error("Невірний логін або пароль");
@@ -126,8 +30,8 @@ export const login = async (username, password) => {
 export const logout = async () => {
   try {
     await axios.post(`${API_URL}logout/`);
-    localStorage.removeItem('username'); // Очищаємо дані користувача з localStorage
-    localStorage.removeItem('token'); // Очищаємо токен
+    localStorage.removeItem('username');
+    localStorage.removeItem('token');
   } catch (error) {
     console.error("Error during logout:", error);
   }
@@ -136,13 +40,12 @@ export const logout = async () => {
 // Функція для перевірки, чи авторизований користувач
 export const checkAuth = () => {
   const token = localStorage.getItem('token');
-  // Перевірка на наявність токену в localStorage
   return token ? true : false;
 };
 
-// Функція для отримання імені користувача (якщо авторизований)
+// Функція для отримання імені користувача
 export const getUsername = () => {
-  return localStorage.getItem('username'); // Отримуємо ім'я користувача з localStorage
+  return localStorage.getItem('username');
 };
 
 // Функція для реєстрації нового користувача
@@ -157,14 +60,25 @@ export const register = async (form) => {
     });
 
     if (response.data && response.data.username) {
-      localStorage.setItem('username', response.data.username); // Зберігаємо ім'я користувача в localStorage
-      localStorage.setItem('token', response.data.token); // Зберігаємо токен
-      return true; // Повертаємо true, якщо реєстрація успішна
+      localStorage.setItem('username', response.data.username);
+      localStorage.setItem('token', response.data.token);
+      return true;
     }
 
-    return false; // Якщо немає username, повертаємо false
+    return false;
   } catch (error) {
     console.error("Error during registration:", error);
     throw new Error("Помилка реєстрації");
   }
 };
+
+export const sendContactMessage = async (form) => {
+  try {
+    const response = await axios.post('http://localhost:5000/api/contact', form);
+    return response.status === 200;
+  } catch (error) {
+    console.error("Помилка при надсиланні повідомлення:", error);
+    throw new Error("Помилка з'єднання з сервером");
+  }
+};
+

@@ -66,7 +66,16 @@ header{
     margin-left: 20px;
     font-family: "Alegreya Sans SC", sans-serif;
     color: #081C30;
+    font-size: 1em;
 }
 .fa-solid {
     font-size: 1.4em;
+    color: #081C30;
+}
+.fa-solid:hover {
+    font-size: 1.4em;
+    color: #081C30;
+}
+.btn-outline-dark {
+    font-size: 1em;
 }
