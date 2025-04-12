@@ -4,6 +4,7 @@ import { ExhibitionsContext } from '../context/ExhibitionsContext';
 import LikeButton from '../components/LikeButton';
 import CommentSection from '../components/CommentSection';
 import styles from '../styles/exhibitionSingle.module.css';
+import axios from 'axios';
 
 import img1 from '../assets/img/exh1.jpg';
 import img2 from '../assets/img/exh2.jpg';
@@ -79,9 +80,15 @@ const staticExhibitions = [
 const ExhibitionSingle = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { fetchSingleExhibition } = useContext(ExhibitionsContext);
+  const { fetchSingleExhibition, updateExhibition, deleteExhibition } = useContext(ExhibitionsContext);
   const [exhibition, setExhibition] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [isEditing, setIsEditing] = useState(false);
+  const [editData, setEditData] = useState({
+    title: '',
+    date: '',
+    description: ''
+  });
 
   useEffect(() => {
     const loadExhibition = async () => {
@@ -89,9 +96,20 @@ const ExhibitionSingle = () => {
         if (id.startsWith('local-')) {
           const staticExh = staticExhibitions.find(ex => ex.id === id);
           setExhibition(staticExh);
+          setEditData({
+            title: staticExh.title,
+            date: staticExh.date,
+            description: Array.isArray(staticExh.description) ? 
+              staticExh.description.join('\n\n') : staticExh.description
+          });
         } else {
           const data = await fetchSingleExhibition(id);
           setExhibition(data);
+          setEditData({
+            title: data.title,
+            date: data.date || `${data.start_date} - ${data.end_date}`,
+            description: data.description
+          });
         }
       } catch (error) {
         console.error("Помилка завантаження:", error);
@@ -104,12 +122,11 @@ const ExhibitionSingle = () => {
 
   useEffect(() => {
     if (exhibition) {
-      document.body.style.setProperty(
-        '--bg-image', 
-        `url(${exhibition.image instanceof File ? 
-          URL.createObjectURL(exhibition.image) : 
-          exhibition.image})`
-      );
+      const imageUrl = exhibition.image instanceof File ? 
+        URL.createObjectURL(exhibition.image) : 
+        exhibition.image;
+      
+      document.body.style.setProperty('--bg-image', `url(${imageUrl})`);
     }
     
     return () => {
@@ -117,19 +134,93 @@ const ExhibitionSingle = () => {
     };
   }, [exhibition]);
 
+  const handleEdit = () => {
+    setIsEditing(true);
+  };
+
+  const handleSave = async () => {
+    try {
+      if (id.startsWith('local-')) {
+        // Для локальних даних просто оновлюємо стан
+        const updatedExhibition = {
+          ...exhibition,
+          title: editData.title,
+          date: editData.date,
+          description: editData.description
+        };
+        setExhibition(updatedExhibition);
+      } else {
+        // Для даних з API відправляємо запит на оновлення
+        await updateExhibition(id, editData);
+        const updatedData = await fetchSingleExhibition(id);
+        setExhibition(updatedData);
+      }
+      setIsEditing(false);
+    } catch (error) {
+      console.error("Помилка збереження:", error);
+    }
+  };
+
+  const handleDelete = async () => {
+    try {
+      if (!id.startsWith('local-')) {
+        await deleteExhibition(id);
+      }
+      navigate('/exhibitions');
+    } catch (error) {
+      console.error("Помилка видалення:", error);
+    }
+  };
+
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setEditData(prev => ({
+      ...prev,
+      [name]: value
+    }));
+  };
+
   if (loading) return <div className={styles.loading}>Завантаження...</div>;
   if (!exhibition) return <div className={styles.error}>Виставку не знайдено</div>;
 
   return (
     <section className={styles.exhibitionSingle}>
       <div className={styles.header}>
-        <h1>{exhibition.title}</h1>
-        <button 
-          onClick={() => navigate(`/edit-exhibition/${id}`)}
-          className={styles.editButton}
-        >
-          Редагувати
-        </button>
+        {isEditing ? (
+          <input
+            type="text"
+            name="title"
+            value={editData.title}
+            onChange={handleInputChange}
+            className={styles.editInput}
+          />
+        ) : (
+          <h1>{exhibition.title}</h1>
+        )}
+        
+        {!isEditing ? (
+          <button 
+            onClick={handleEdit}
+            className={styles.editButton}
+          >
+            Редагувати
+          </button>
+        ) : (
+          <div className={styles.editButtons}>
+            <button 
+              onClick={handleSave}
+              className={styles.saveButton}
+            >
+              Зберегти
+            </button>
+            <button 
+              onClick={handleDelete}
+              className={styles.deleteButton}
+            >
+              Видалити
+            </button>
+          </div>
+        )}
       </div>
 
       <div className={styles.content}>
@@ -139,23 +230,50 @@ const ExhibitionSingle = () => {
           className={styles.image}
         />
         
-        <div className={styles.details}>
-          <p className={styles.dates}>
-            {exhibition.date || `${exhibition.start_date} - ${exhibition.end_date}`}
-          </p>
-          <p className={styles.description}>{exhibition.description}</p>
-          
-          <div className={styles.interactions}>
-            <LikeButton exhibitionId={id} />
-          </div>
+        {isEditing ? (
+          <>
+            <input
+              type="text"
+              name="date"
+              value={editData.date}
+              onChange={handleInputChange}
+              className={styles.editInput}
+            />
+            <textarea
+              name="description"
+              value={editData.description}
+              onChange={handleInputChange}
+              className={styles.editTextarea}
+            />
+          </>
+        ) : (
+          <>
+            <p className={styles.dates}>
+              {exhibition.date || `${exhibition.start_date} - ${exhibition.end_date}`}
+            </p>
+            <div className={styles.description}>
+              {Array.isArray(exhibition.description) ? (
+                exhibition.description.map((paragraph, index) => (
+                  <p key={index}>{paragraph}</p>
+                ))
+              ) : (
+                <p>{exhibition.description}</p>
+              )}
+            </div>
+          </>
+        )}
+        
+        <div className={styles.interactions}>
+          <LikeButton exhibitionId={id} />
         </div>
       </div>
 
-      <CommentSection exhibitionId={id} />
+      <CommentSection 
+        exhibitionId={id} 
+        isEditing={isEditing} 
+      />
     </section>
   );
 };
-
-
 
 export default ExhibitionSingle;
